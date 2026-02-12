@@ -9,8 +9,8 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["system-ui", "ui-sans-serif", "sans-serif"],
-        serif: ["\"Playfair Display\"", "ui-serif", "serif"]
+        sans: ["var(--font-sans)", "system-ui", "ui-sans-serif", "sans-serif"],
+        serif: ["var(--font-display)", "ui-serif", "serif"]
       }
     }
   },

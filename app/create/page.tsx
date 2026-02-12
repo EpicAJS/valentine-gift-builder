@@ -17,6 +17,7 @@ import {
 } from "@/components/screens/registry";
 import { Button } from "@/components/ui/button";
 import { GiftBuilderProvider } from "@/lib/giftBuilderContext";
+import { useRouter } from "next/navigation";
 
 type BuilderStep = 0 | 1 | 2 | 3 | 4;
 
@@ -29,6 +30,7 @@ const steps: { id: BuilderStep; label: string }[] = [
 ];
 
 function CreateGiftInner({ slug }: { slug: string }) {
+  const router = useRouter();
   const [step, setStep] = useState<BuilderStep>(0);
 
   const [theme, setTheme] = useState<Theme>({
@@ -475,7 +477,7 @@ function CreateGiftInner({ slug }: { slug: string }) {
             Back
           </Button>
           <div className="flex items-center gap-3">
-            {step < 4 && (
+            {step < 3 && (
               <Button
                 type="button"
                 size="sm"
@@ -485,7 +487,7 @@ function CreateGiftInner({ slug }: { slug: string }) {
                 Next
               </Button>
             )}
-            {step >= 3 && (
+            {step === 3 && (
               <Button
                 type="button"
                 size="sm"
@@ -493,6 +495,15 @@ function CreateGiftInner({ slug }: { slug: string }) {
                 disabled={saving || screens.length === 0}
               >
                 {saving ? "Saving…" : "Generate link"}
+              </Button>
+            )}
+            {step === 4 && savedSlug && (
+              <Button
+                type="button"
+                size="sm"
+                onClick={() => router.push("/")}
+              >
+                Restart / Go home
               </Button>
             )}
           </div>

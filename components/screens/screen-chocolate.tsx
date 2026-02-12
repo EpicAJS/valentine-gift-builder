@@ -44,7 +44,8 @@ export function ChocolateScreenRender({
     setSelectedChocolate(null);
   };
 
-  const accentBg = theme?.background ?? "bg-gradient-to-br from-rose-800 to-pink-900";
+  const accent = theme?.accent ?? "#fb7185";
+  const background = theme?.background;
 
   if (!reasons.length) {
     return (
@@ -61,14 +62,20 @@ export function ChocolateScreenRender({
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 py-12">
+    <div
+      className="min-h-screen flex items-center justify-center p-4 py-12"
+      style={{ background: background ?? "#fff1f2" }}
+    >
       <div className="max-w-5xl w-full">
         <motion.div
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           className="text-center mb-8"
         >
-          <Heart className="w-12 h-12 mx-auto mb-4 fill-rose-500 text-rose-500" />
+          <Heart
+            className="w-12 h-12 mx-auto mb-4"
+            style={{ fill: accent, color: accent }}
+          />
           <h2 className="text-3xl md:text-5xl font-bold text-rose-600 mb-2 font-serif">
             {reasons.length} Reasons I Love You
           </h2>
@@ -84,7 +91,10 @@ export function ChocolateScreenRender({
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ delay: 0.2 }}
-          className={`${accentBg} rounded-3xl shadow-2xl p-8 md:p-12 relative overflow-hidden`}
+          className={`rounded-3xl shadow-2xl p-8 md:p-12 relative overflow-hidden ${
+            background ? "" : "bg-gradient-to-br from-rose-800 to-pink-900"
+          }`}
+          style={background ? { background } : undefined}
         >
           <div className="absolute inset-0 opacity-10 pointer-events-none">
             <div className="absolute top-4 left-4 text-6xl">♥</div>
@@ -110,7 +120,10 @@ export function ChocolateScreenRender({
                   } shadow-lg hover:shadow-xl transform hover:scale-110 flex items-center justify-center`}
                 >
                   {openedChocolates.includes(index) ? (
-                    <Heart className="w-1/2 h-1/2 fill-rose-400 text-rose-400" />
+                    <Heart
+                      className="w-1/2 h-1/2"
+                      style={{ fill: accent, color: accent }}
+                    />
                   ) : (
                     <div className="text-amber-300 text-xl font-bold">
                       {index + 1}
@@ -215,7 +228,7 @@ export function ChocolateScreenEditor({
   useEffect(() => {
     onChange({
       ...value,
-      reasons: localReasons.filter((r) => r.trim().length > 0).slice(0, 12)
+      reasons: localReasons.filter((r) => r.trim().length > 0).slice(0, 14)
     });
   }, [localReasons, onChange, value]);
 
@@ -226,7 +239,7 @@ export function ChocolateScreenEditor({
   };
 
   const addReason = () => {
-    if (localReasons.length >= 12) return;
+    if (localReasons.length >= 14) return;
     setLocalReasons((prev) => [...prev, ""]);
   };
 
@@ -237,7 +250,7 @@ export function ChocolateScreenEditor({
   return (
     <div className="space-y-4">
       <p className="text-sm text-rose-500">
-        Add up to 12 little reasons you love them.
+        Add up to 14 little reasons you love them.
       </p>
       <div className="space-y-3">
         {localReasons.map((reason, index) => (
@@ -266,7 +279,7 @@ export function ChocolateScreenEditor({
           </div>
         ))}
       </div>
-      {localReasons.length < 12 && (
+      {localReasons.length < 14 && (
         <Button type="button" size="sm" onClick={addReason}>
           Add another reason
         </Button>

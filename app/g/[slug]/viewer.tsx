@@ -3,17 +3,27 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Heart, Sparkles } from "lucide-react";
-import { GiftConfig, GiftScreen } from "@/lib/giftSchema";
+import { GiftConfig, GiftScreen, Theme } from "@/lib/giftSchema";
 import { screenRegistry } from "@/components/screens/registry";
 import { Button } from "@/components/ui/button";
 
 function LandingScreen({
-  onNext
+  onNext,
+  theme
 }: {
   onNext: () => void;
+  theme?: Theme;
 }) {
+  const accent = theme?.accent ?? "#fb7185";
+  const background = theme?.background;
+
   return (
-    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center p-4 bg-gradient-to-b from-rose-50 to-pink-50">
+    <div
+      className={`min-h-[calc(100vh-4rem)] flex items-center justify-center p-4 ${
+        background ? "" : "bg-gradient-to-b from-rose-50 to-pink-50"
+      }`}
+      style={background ? { background } : undefined}
+    >
       <motion.div
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
@@ -83,13 +93,21 @@ function LandingScreen({
 
 function FinalNoteScreen({
   note,
+  theme,
   onBackToStart
 }: {
   note: GiftConfig["note"];
+  theme?: Theme;
   onBackToStart: () => void;
 }) {
+  const accent = theme?.accent ?? "#fb7185";
+  const background = theme?.background;
+
   return (
-    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center p-4 relative overflow-hidden bg-rose-50">
+    <div
+      className="min-h-[calc(100vh-4rem)] flex items-center justify-center p-4 relative overflow-hidden"
+      style={{ background: background ?? "#fff1f2" }}
+    >
       <AnimatePresence>
         {[...Array(40)].map((_, i) => (
           <motion.div
@@ -136,7 +154,10 @@ function FinalNoteScreen({
 
           <div className="space-y-6">
             <div className="text-center mb-4">
-              <Heart className="w-12 h-12 mx-auto mb-3 fill-rose-500 text-rose-500" />
+              <Heart
+                className="w-12 h-12 mx-auto mb-3"
+                style={{ fill: accent, color: accent }}
+              />
               <h2 className="text-2xl md:text-3xl font-bold text-rose-600 font-serif">
                 {note.title || "A Note From My Heart"}
               </h2>
@@ -184,7 +205,7 @@ export function GiftViewer({ config }: { config: GiftConfig }) {
   const goBackToStart = () => setIndex(-1);
 
   if (index === -1) {
-    return <LandingScreen onNext={goNext} />;
+    return <LandingScreen onNext={goNext} theme={config.theme} />;
   }
 
   if (index < config.screens.length) {
@@ -200,6 +221,12 @@ export function GiftViewer({ config }: { config: GiftConfig }) {
     );
   }
 
-  return <FinalNoteScreen note={config.note} onBackToStart={goBackToStart} />;
+  return (
+    <FinalNoteScreen
+      note={config.note}
+      theme={config.theme}
+      onBackToStart={goBackToStart}
+    />
+  );
 }
 

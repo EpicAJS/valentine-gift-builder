@@ -39,7 +39,7 @@ export const chocolateScreenSchema = z.object({
   reasons: z
     .array(z.string().min(1, "Reason cannot be empty"))
     .min(1, "Add at least one reason")
-    .max(12, "Maximum of 12 reasons")
+    .max(14, "Maximum of 14 reasons")
 });
 
 export type ChocolateScreenConfig = z.infer<typeof chocolateScreenSchema>;

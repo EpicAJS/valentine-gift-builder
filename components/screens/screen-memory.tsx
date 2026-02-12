@@ -12,6 +12,8 @@ import type {
 } from "@/lib/giftSchema";
 import type { ScreenEditorProps, ScreenRenderProps } from "./registry";
 import { nanoid } from "nanoid";
+import { useGiftBuilder } from "@/lib/giftBuilderContext";
+import { supabaseBrowserClient } from "@/lib/supabase/client";
 
 type MemoryScreenData = Extract<GiftScreen, { type: "memory" }>;
 
@@ -245,6 +247,10 @@ export function MemoryScreenEditor({
   value,
   onChange
 }: ScreenEditorProps<MemoryScreenConfig>) {
+  const { slug } = useGiftBuilder();
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
   const updateCard = (
     index: number,
     field: "image" | "label",
@@ -277,10 +283,59 @@ export function MemoryScreenEditor({
     });
   };
 
+  const handleFiles = async (files: FileList | null) => {
+    if (!files || !supabaseBrowserClient || !slug) return;
+    setError(null);
+
+    const existing = value.cards.length;
+    const maxToAdd = 6 - existing;
+    const slice = Array.from(files).slice(0, maxToAdd);
+
+    setUploading(true);
+    try {
+      const newCards = [...value.cards];
+
+      for (const file of slice) {
+        if (file.size > 8 * 1024 * 1024) {
+          setError("Some files were over 8MB and were skipped.");
+          continue;
+        }
+
+        const ext = file.name.split(".").pop() || "jpg";
+        const id = nanoid(6);
+        const path = `${slug}/memory-${id}.${ext}`;
+
+        const { error: uploadError } = await supabaseBrowserClient.storage
+          .from("gift-assets")
+          .upload(path, file);
+
+        if (uploadError) {
+          setError(uploadError.message);
+          continue;
+        }
+
+        const { data } = supabaseBrowserClient.storage
+          .from("gift-assets")
+          .getPublicUrl(path);
+
+        newCards.push({
+          id,
+          image: data.publicUrl,
+          label: ""
+        });
+      }
+
+      onChange({ ...value, cards: newCards });
+    } finally {
+      setUploading(false);
+    }
+  };
+
   return (
     <div className="space-y-4">
       <p className="text-sm text-rose-500">
-        Add 4–6 images to turn into a cute little memory game.
+        Add 4–6 images to turn into a cute little memory game. You can upload
+        from your device or paste image URLs.
       </p>
       <div className="space-y-3">
         {value.cards.map((card, index) => (
@@ -298,7 +353,7 @@ export function MemoryScreenEditor({
                 onChange={(e) =>
                   updateCard(index, "image", e.target.value)
                 }
-                placeholder="Image URL"
+                placeholder="Image URL (optional if uploaded)"
                 className="flex-1 rounded-lg border border-rose-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400"
               />
               <Button
@@ -322,10 +377,33 @@ export function MemoryScreenEditor({
           </div>
         ))}
       </div>
-      {value.cards.length < 6 && (
-        <Button type="button" size="sm" onClick={addCard}>
-          Add another pair
-        </Button>
+      <div className="flex flex-wrap items-center gap-3">
+        {value.cards.length < 6 && (
+          <Button type="button" size="sm" onClick={addCard}>
+            Add by URL
+          </Button>
+        )}
+
+        <label className="text-sm text-rose-600">
+          <span className="mr-2">Upload images</span>
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            className="hidden"
+            onChange={(e) => handleFiles(e.target.files)}
+          />
+        </label>
+
+        {uploading && (
+          <span className="text-xs text-rose-400">Uploading…</span>
+        )}
+      </div>
+
+      {error && (
+        <p className="text-xs text-rose-500">
+          {error}
+        </p>
       )}
     </div>
   );

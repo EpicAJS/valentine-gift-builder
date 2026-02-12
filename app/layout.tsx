@@ -1,5 +1,16 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { DM_Sans, Playfair_Display } from "next/font/google";
+
+const sans = DM_Sans({
+  subsets: ["latin"],
+  variable: "--font-sans"
+});
+
+const display = Playfair_Display({
+  subsets: ["latin"],
+  variable: "--font-display"
+});
 
 export const metadata: Metadata = {
   title: "Valentine Gift Builder",
@@ -13,7 +24,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="min-h-screen bg-rose-50 text-gray-900 antialiased">
+      <body
+        className={`${sans.variable} ${display.variable} min-h-screen bg-rose-50 text-gray-900 antialiased`}
+      >
         <div className="min-h-screen flex flex-col">
           <main className="flex-1">{children}</main>
           <footer className="py-4 text-center text-xs text-rose-400 border-t border-rose-100">

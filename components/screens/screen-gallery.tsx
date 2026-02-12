@@ -263,7 +263,8 @@ export function GalleryScreenEditor({
   return (
     <div className="space-y-4">
       <p className="text-sm text-rose-500">
-        Add up to 12 photos. Uploads are stored safely with a secret link.
+        Add up to 12 photos. You can upload from your device or paste a photo
+        link—uploads are stored safely with a secret link.
       </p>
 
       <div className="space-y-4">
