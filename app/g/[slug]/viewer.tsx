@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Heart, Sparkles } from "lucide-react";
+import { Heart, Sparkles, ExternalLink } from "lucide-react";
 import { GiftConfig, GiftScreen, Theme } from "@/lib/giftSchema";
 import { screenRegistry } from "@/components/screens/registry";
 import { Button } from "@/components/ui/button";
@@ -178,10 +179,19 @@ function FinalNoteScreen({
                 />
               ))}
             </div>
-            <div className="text-center pt-4">
+            <div className="text-center pt-4 space-y-4">
               <Button size="lg" onClick={onBackToStart}>
                 Back to beginning
               </Button>
+              <div className="pt-2">
+                <Link
+                  href="/"
+                  className="inline-flex items-center gap-2 text-sm text-rose-500 hover:text-rose-600 underline underline-offset-2"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  Create your own gift at FromMe
+                </Link>
+              </div>
             </div>
           </div>
         </motion.div>

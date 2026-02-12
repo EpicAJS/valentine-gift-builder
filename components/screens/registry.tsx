@@ -1,7 +1,10 @@
-import type { Theme, GiftScreen, ScreenType, GalleryScreenConfig, ChocolateScreenConfig, MemoryScreenConfig } from "@/lib/giftSchema";
+import type { Theme, GiftScreen, ScreenType, GalleryScreenConfig, ChocolateScreenConfig, MemoryScreenConfig, MatchingPairsScreenConfig, ScrambleScreenConfig, WordSearchScreenConfig } from "@/lib/giftSchema";
 import { GalleryScreenRender, GalleryScreenEditor } from "./screen-gallery";
 import { ChocolateScreenRender, ChocolateScreenEditor } from "./screen-chocolate";
 import { MemoryScreenRender, MemoryScreenEditor } from "./screen-memory";
+import { MatchingPairsScreenRender, MatchingPairsScreenEditor } from "./screen-matching";
+import { ScrambleScreenRender, ScrambleScreenEditor } from "./screen-scramble";
+import { WordSearchScreenRender, WordSearchScreenEditor } from "./screen-wordsearch";
 
 export interface ScreenRenderProps<TData extends GiftScreen> {
   data: TData;
@@ -59,10 +62,47 @@ export const screenRegistry: Record<
     } satisfies MemoryScreenConfig,
     Render: MemoryScreenRender,
     Editor: MemoryScreenEditor
+  },
+  matchingPairs: {
+    type: "matchingPairs",
+    label: "Perfect Match",
+    description: "Match questions with their answers.",
+    defaultConfig: {
+      type: "matchingPairs",
+      pairs: []
+    } satisfies MatchingPairsScreenConfig,
+    Render: MatchingPairsScreenRender,
+    Editor: MatchingPairsScreenEditor
+  },
+  scramble: {
+    type: "scramble",
+    label: "Letter Scramble",
+    description: "Unscramble words to reveal messages.",
+    defaultConfig: {
+      type: "scramble",
+      phrases: []
+    } satisfies ScrambleScreenConfig,
+    Render: ScrambleScreenRender,
+    Editor: ScrambleScreenEditor
+  },
+  wordSearch: {
+    type: "wordSearch",
+    label: "Word Search",
+    description: "Find words hidden in a grid to reveal messages.",
+    defaultConfig: {
+      type: "wordSearch",
+      words: []
+    } satisfies WordSearchScreenConfig,
+    Render: WordSearchScreenRender,
+    Editor: WordSearchScreenEditor
   }
 };
 
-export const availableScreenTypes = Object.keys(
-  screenRegistry
-) as ScreenType[];
+/** Screen types that can be chosen when creating a new gift. Gallery and memory are excluded but still render for existing links. */
+export const availableScreenTypes: ScreenType[] = [
+  "chocolate",
+  "matchingPairs",
+  "scramble",
+  "wordSearch"
+];
 

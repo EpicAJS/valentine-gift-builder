@@ -15,6 +15,40 @@ import {
   availableScreenTypes,
   screenRegistry
 } from "@/components/screens/registry";
+
+/** Build a config with placeholder note so we can validate only screens. */
+function configWithPlaceholderNote(config: GiftConfig): GiftConfig {
+  return {
+    ...config,
+    note: { title: "", body: "placeholder", from: "" }
+  };
+}
+
+/** Format Zod config errors into a list of user-friendly messages. */
+function formatConfigErrors(
+  config: GiftConfig,
+  error: z.ZodError
+): string[] {
+  const screens = config.screens;
+  const messages: string[] = [];
+  for (const issue of error.issues) {
+    const path = issue.path as (string | number)[];
+    if (path[0] === "screens" && typeof path[1] === "number") {
+      const screenIndex = path[1];
+      const screen = screens[screenIndex];
+      const label = screen
+        ? screenRegistry[screen.type as ScreenType]?.label ?? `Screen ${screenIndex + 1}`
+        : `Screen ${screenIndex + 1}`;
+      messages.push(`Screen ${screenIndex + 1} (${label}): ${issue.message}`);
+    } else if (path[0] === "note") {
+      const field = path[1] === "body" ? "Message" : path[1] === "title" ? "Title" : path[1] === "from" ? "From" : String(path[1]);
+      messages.push(`Note — ${field}: ${issue.message}`);
+    } else {
+      messages.push(issue.message);
+    }
+  }
+  return [...new Set(messages)];
+}
 import { Button } from "@/components/ui/button";
 import { GiftBuilderProvider } from "@/lib/giftBuilderContext";
 import { useRouter } from "next/navigation";
@@ -50,14 +84,49 @@ function CreateGiftInner({ slug }: { slug: string }) {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [savedSlug, setSavedSlug] = useState<string | null>(null);
+  const [linkCopied, setLinkCopied] = useState(false);
+
+  const config: GiftConfig = useMemo(
+    () => ({ theme, screens, note }),
+    [theme, screens, note]
+  );
+
+  const configValidation = useMemo(
+    () => giftConfigSchema.safeParse(config),
+    [config]
+  );
+
+  /** Validate only screens (placeholder note) — used on Configure step. */
+  const screensValidation = useMemo(
+    () => giftConfigSchema.safeParse(configWithPlaceholderNote(config)),
+    [config]
+  );
+
+  const isConfigValid = configValidation.success;
+  const isScreensValid = screensValidation.success;
+
+  const configErrors = useMemo(() => {
+    if (configValidation.success) return [];
+    return formatConfigErrors(config, configValidation.error);
+  }, [config, configValidation.success, configValidation.error]);
+
+  const screensErrors = useMemo(() => {
+    if (screensValidation.success) return [];
+    return formatConfigErrors(config, screensValidation.error);
+  }, [config, screensValidation.success, screensValidation.error]);
+
+  const isNoteValid = note.body.trim().length > 0;
+  const noteError = !isNoteValid && (step === 3 || step === 4)
+    ? "Please write a note for your recipient."
+    : null;
 
   const canGoNext = useMemo(() => {
     if (step === 0) return true;
     if (step === 1) return screens.length >= 1 && screens.length <= 3;
-    if (step === 2) return screens.length >= 1;
-    if (step === 3) return note.body.trim().length > 0;
+    if (step === 2) return screens.length >= 1 && isScreensValid;
+    if (step === 3) return false; // no "Next" on note step; only Generate link
     return true;
-  }, [step, screens, note.body]);
+  }, [step, screens.length, isScreensValid]);
 
   const goNext = () => {
     if (step < 4) setStep((s) => (s + 1) as BuilderStep);
@@ -85,12 +154,6 @@ function CreateGiftInner({ slug }: { slug: string }) {
     setScreens((prev) =>
       prev.map((s, i) => (i === index ? (config as GiftScreen) : s))
     );
-  };
-
-  const config: GiftConfig = {
-    theme,
-    screens,
-    note
   };
 
   const handleSave = async () => {
@@ -150,7 +213,7 @@ function CreateGiftInner({ slug }: { slug: string }) {
       <div className="max-w-3xl w-full mx-auto">
         <header className="mb-6">
           <h1 className="text-2xl font-serif font-bold text-rose-600">
-            Create your Valentine gift
+            Create your gift
           </h1>
           <p className="text-sm text-rose-400 mt-1">
             Choose up to three screens, customize them, then share a magic
@@ -309,6 +372,24 @@ function CreateGiftInner({ slug }: { slug: string }) {
               <h2 className="text-lg font-semibold text-rose-600">
                 Configure screens
               </h2>
+              <p className="text-sm text-rose-400">
+                Fill in each screen below. You must complete all required fields before continuing.
+              </p>
+              {screensErrors.length > 0 && (
+                <div
+                  role="alert"
+                  className="rounded-xl border-2 border-rose-300 bg-rose-50 p-4"
+                >
+                  <p className="font-semibold text-rose-700 mb-2">
+                    Please fix the following before continuing:
+                  </p>
+                  <ul className="list-disc list-inside space-y-1 text-sm text-rose-700">
+                    {screensErrors.map((msg, i) => (
+                      <li key={i}>{msg}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
               {screens.length === 0 ? (
                 <p className="text-sm text-rose-400">
                   Pick your screens first in the previous step.
@@ -362,8 +443,28 @@ function CreateGiftInner({ slug }: { slug: string }) {
                 Final note
               </h2>
               <p className="text-sm text-rose-400">
-                This is the last screen your Valentine will see.
+                This is the last screen your recipient will see. Write your note below. Generate link will be enabled once the note is complete and all previous steps are valid.
               </p>
+
+              {(noteError || configErrors.length > 0 || validationError) && (
+                <div
+                  role="alert"
+                  className="rounded-xl border-2 border-rose-300 bg-rose-50 p-4"
+                >
+                  <p className="font-semibold text-rose-700 mb-2">
+                    Please fix the following before generating your link:
+                  </p>
+                  <ul className="list-disc list-inside space-y-1 text-sm text-rose-700">
+                    {noteError && <li key="note">{noteError}</li>}
+                    {validationError && <li key="save">{validationError}</li>}
+                    {configErrors
+                      .filter((e) => !e.startsWith("Note —"))
+                      .map((msg, i) => (
+                        <li key={`config-${i}`}>{msg}</li>
+                      ))}
+                  </ul>
+                </div>
+              )}
 
               <div className="space-y-3">
                 <div className="space-y-1">
@@ -382,7 +483,7 @@ function CreateGiftInner({ slug }: { slug: string }) {
                 </div>
                 <div className="space-y-1">
                   <label className="text-xs font-medium text-rose-500">
-                    Message
+                    Message <span className="text-rose-400 font-normal">(required)</span>
                   </label>
                   <textarea
                     value={note.body}
@@ -391,8 +492,17 @@ function CreateGiftInner({ slug }: { slug: string }) {
                     }
                     rows={6}
                     placeholder="Write from the heart..."
-                    className="w-full rounded-lg border border-rose-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400"
+                    className={`w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400 ${
+                      !isNoteValid && note.body.length === 0
+                        ? "border-rose-300 bg-rose-50/50"
+                        : "border-rose-100"
+                    }`}
                   />
+                  {!isNoteValid && (
+                    <p className="text-xs text-rose-600">
+                      Add at least one character to your note.
+                    </p>
+                  )}
                 </div>
                 <div className="space-y-1">
                   <label className="text-xs font-medium text-rose-500">
@@ -409,9 +519,6 @@ function CreateGiftInner({ slug }: { slug: string }) {
                   />
                 </div>
               </div>
-              {validationError && (
-                <p className="text-xs text-rose-500">{validationError}</p>
-              )}
             </div>
           )}
 
@@ -428,7 +535,7 @@ function CreateGiftInner({ slug }: { slug: string }) {
               {savedSlug && (
                 <div className="space-y-3">
                   <p className="text-sm text-rose-500">
-                    Gift saved! Share this link with your Valentine:
+                    Gift saved! Share this link with your recipient:
                   </p>
                   <div className="flex flex-col sm:flex-row gap-2">
                     <input
@@ -443,6 +550,8 @@ function CreateGiftInner({ slug }: { slug: string }) {
                       onClick={async () => {
                         try {
                           await navigator.clipboard.writeText(shareUrl);
+                          setLinkCopied(true);
+                          setTimeout(() => setLinkCopied(false), 2500);
                         } catch {
                           // ignore
                         }
@@ -492,7 +601,12 @@ function CreateGiftInner({ slug }: { slug: string }) {
                 type="button"
                 size="sm"
                 onClick={handleSave}
-                disabled={saving || screens.length === 0}
+                disabled={
+                  saving ||
+                  screens.length === 0 ||
+                  !isNoteValid ||
+                  !isConfigValid
+                }
               >
                 {saving ? "Saving…" : "Generate link"}
               </Button>
@@ -509,6 +623,16 @@ function CreateGiftInner({ slug }: { slug: string }) {
           </div>
         </div>
       </div>
+
+      {linkCopied && (
+        <div
+          className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-full bg-rose-600 px-5 py-2.5 text-sm font-medium text-white shadow-lg"
+          role="status"
+          aria-live="polite"
+        >
+          Link copied to clipboard
+        </div>
+      )}
     </div>
   );
 }
