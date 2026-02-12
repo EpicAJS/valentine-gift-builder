@@ -1,0 +1,79 @@
+import { z } from "zod";
+
+export const themeSchema = z.object({
+  accent: z.string().optional(),
+  background: z.string().optional()
+});
+
+export type Theme = z.infer<typeof themeSchema>;
+
+export const noteSchema = z.object({
+  title: z.string().max(120).optional(),
+  body: z
+    .string()
+    .min(1, "Please write a note for your Valentine.")
+    .max(2000, "Note is a bit too long for this card."),
+  from: z.string().max(80).optional()
+});
+
+export type NoteConfig = z.infer<typeof noteSchema>;
+
+export const galleryScreenSchema = z.object({
+  type: z.literal("gallery"),
+  photos: z
+    .array(
+      z.object({
+        id: z.string(),
+        url: z.string().url("Photo must be a valid URL"),
+        caption: z.string().optional()
+      })
+    )
+    .min(1, "Add at least one photo")
+    .max(12, "Maximum of 12 photos")
+});
+
+export type GalleryScreenConfig = z.infer<typeof galleryScreenSchema>;
+
+export const chocolateScreenSchema = z.object({
+  type: z.literal("chocolate"),
+  reasons: z
+    .array(z.string().min(1, "Reason cannot be empty"))
+    .min(1, "Add at least one reason")
+    .max(12, "Maximum of 12 reasons")
+});
+
+export type ChocolateScreenConfig = z.infer<typeof chocolateScreenSchema>;
+
+export const memoryScreenSchema = z.object({
+  type: z.literal("memory"),
+  cards: z
+    .array(
+      z.object({
+        id: z.string(),
+        image: z.string().url("Card image must be a valid URL"),
+        label: z.string().optional()
+      })
+    )
+    .min(4, "Add at least 4 cards")
+    .max(12, "Maximum of 12 cards")
+});
+
+export type MemoryScreenConfig = z.infer<typeof memoryScreenSchema>;
+
+export const screenSchema = z.discriminatedUnion("type", [
+  galleryScreenSchema,
+  chocolateScreenSchema,
+  memoryScreenSchema
+]);
+
+export type GiftScreen = z.infer<typeof screenSchema>;
+export type ScreenType = GiftScreen["type"];
+
+export const giftConfigSchema = z.object({
+  theme: themeSchema.optional(),
+  screens: z.array(screenSchema).min(1).max(3),
+  note: noteSchema
+});
+
+export type GiftConfig = z.infer<typeof giftConfigSchema>;
+
