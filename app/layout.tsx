@@ -20,6 +20,13 @@ export const metadata: Metadata = {
   description: "Create personal, interactive gifts for Valentine's, anniversaries, and special occasions. One link, no account required to view."
 };
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  viewportFit: "cover"
+};
+
 export default function RootLayout({
   children
 }: {
@@ -33,7 +40,7 @@ export default function RootLayout({
         <div className="min-h-screen flex flex-col">
           <LayoutNav />
           <main className="flex-1">{children}</main>
-          <footer className="py-4 text-center text-xs text-rose-400 border-t border-rose-100">
+          <footer className="py-4 pb-[calc(1rem+env(safe-area-inset-bottom))] text-center text-xs text-rose-400 border-t border-rose-100">
             FromMe — Made with love ❤️
           </footer>
         </div>

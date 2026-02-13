@@ -20,7 +20,7 @@ function LandingScreen({
 
   return (
     <div
-      className={`min-h-[calc(100vh-4rem)] flex items-center justify-center p-4 ${
+      className={`min-h-[calc(100vh-4rem)] flex items-center justify-center p-4 sm:p-6 ${
         background ? "" : "bg-gradient-to-b from-rose-50 to-pink-50"
       }`}
       style={background ? { background } : undefined}
@@ -73,7 +73,7 @@ function LandingScreen({
           <Button
             onClick={onNext}
             size="lg"
-            className="px-8 py-4 text-lg"
+            className="px-6 sm:px-8 py-3.5 sm:py-4 text-base sm:text-lg min-h-[48px]"
           >
             Open your gift
           </Button>
@@ -106,7 +106,7 @@ function FinalNoteScreen({
 
   return (
     <div
-      className="min-h-[calc(100vh-4rem)] flex items-center justify-center p-4 relative overflow-hidden"
+      className="min-h-[calc(100vh-4rem)] flex items-center justify-center p-4 sm:p-6 relative overflow-hidden"
       style={{ background: background ?? "#fff1f2" }}
     >
       <AnimatePresence>
@@ -138,7 +138,7 @@ function FinalNoteScreen({
           initial={{ scale: 0.9, opacity: 0, y: 20 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: "easeOut" }}
-          className="bg-white rounded-3xl shadow-2xl p-8 md:p-12 relative"
+          className="bg-white rounded-3xl shadow-2xl p-5 sm:p-8 md:p-12 relative mx-2 sm:mx-0"
         >
           <div className="absolute top-4 left-4">
             <Heart className="w-6 h-6 fill-rose-300 text-rose-300" />

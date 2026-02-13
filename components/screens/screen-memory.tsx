@@ -141,7 +141,7 @@ export function MemoryScreenRender({
   const accent = theme?.accent ?? "#fb7185";
 
   return (
-    <div className="min-h-screen flex flex-col items-center p-4 py-8 pb-16" style={{ background: theme?.background ?? "#fff1f2" }}>
+    <div className="min-h-screen flex flex-col items-center p-4 sm:p-6 py-6 sm:py-8 pb-[calc(4rem+env(safe-area-inset-bottom))]" style={{ background: theme?.background ?? "#fff1f2" }}>
       <div className="max-w-2xl w-full">
         <motion.div
           initial={{ y: -20, opacity: 0 }}

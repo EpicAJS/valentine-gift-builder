@@ -95,7 +95,7 @@ export function ScrambleScreenRender({
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center p-4 py-12"
+      className="min-h-screen flex items-center justify-center p-4 sm:p-6 py-8 sm:py-12 pb-[calc(2rem+env(safe-area-inset-bottom))]"
       style={{ background: background ?? "#fff1f2" }}
     >
       <div className="max-w-3xl w-full">

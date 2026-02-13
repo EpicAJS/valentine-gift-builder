@@ -4,9 +4,34 @@
 
 html {
   scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
   @apply bg-rose-50 text-gray-900;
+  overflow-x: hidden;
+}
+
+/* Minimum touch target size on touch devices (accessibility) */
+@media (pointer: coarse) {
+  button,
+  a[href],
+  [role="button"] {
+    min-height: 44px;
+  }
+  /* Inline/compact controls (e.g. step pills) can be smaller height if in a scroll row */
+  nav button {
+    min-height: 36px;
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 }
 

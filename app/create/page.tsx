@@ -209,8 +209,8 @@ function CreateGiftInner({ slug }: { slug: string }) {
     : "";
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] flex flex-col px-4 py-6">
-      <div className="max-w-3xl w-full mx-auto">
+    <div className="min-h-[calc(100vh-4rem)] flex flex-col px-4 sm:px-6 py-4 sm:py-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))]">
+      <div className="max-w-3xl w-full mx-auto flex-1 flex flex-col">
         <header className="mb-6">
           <h1 className="text-2xl font-serif font-bold text-rose-600">
             Create your gift
@@ -221,7 +221,7 @@ function CreateGiftInner({ slug }: { slug: string }) {
           </p>
         </header>
 
-        <nav className="flex items-center gap-2 mb-6 overflow-x-auto">
+        <nav className="flex items-center gap-2 mb-4 sm:mb-6 overflow-x-auto pb-1 -mx-1 scrollbar-hide touch-pan-x">
           {steps.map((s, index) => {
             const isActive = s.id === step;
             const isComplete = step > s.id;
@@ -231,7 +231,7 @@ function CreateGiftInner({ slug }: { slug: string }) {
                   type="button"
                   disabled={s.id > step}
                   onClick={() => setStep(s.id)}
-                  className={`flex items-center gap-2 rounded-full px-3 py-1.5 text-xs border ${
+                  className={`flex items-center gap-2 rounded-full px-3 py-2 sm:py-1.5 text-xs border shrink-0 min-h-[36px] ${
                     isActive
                       ? "border-rose-500 bg-rose-50 text-rose-600"
                       : isComplete
@@ -250,7 +250,7 @@ function CreateGiftInner({ slug }: { slug: string }) {
           })}
         </nav>
 
-        <section className="rounded-2xl bg-white shadow-sm border border-rose-100 p-4 sm:p-6 mb-6">
+        <section className="rounded-2xl bg-white shadow-sm border border-rose-100 p-4 sm:p-6 mb-4 sm:mb-6 flex-1 min-h-0">
           {step === 0 && (
             <div className="space-y-4">
               <h2 className="text-lg font-semibold text-rose-600">
@@ -286,7 +286,7 @@ function CreateGiftInner({ slug }: { slug: string }) {
                           accent: e.target.value
                         }))
                       }
-                      className="flex-1 rounded-lg border border-rose-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400"
+                      className="flex-1 min-h-[44px] rounded-lg border border-rose-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400"
                     />
                   </div>
                 </div>
@@ -315,7 +315,7 @@ function CreateGiftInner({ slug }: { slug: string }) {
                           background: e.target.value
                         }))
                       }
-                      className="flex-1 rounded-lg border border-rose-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400"
+                      className="flex-1 min-h-[44px] rounded-lg border border-rose-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400"
                     />
                   </div>
                 </div>
@@ -478,7 +478,7 @@ function CreateGiftInner({ slug }: { slug: string }) {
                       setNote((n) => ({ ...n, title: e.target.value }))
                     }
                     placeholder="A Note From My Heart"
-                    className="w-full rounded-lg border border-rose-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400"
+                    className="w-full min-h-[44px] rounded-lg border border-rose-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400"
                   />
                 </div>
                 <div className="space-y-1">
@@ -492,7 +492,7 @@ function CreateGiftInner({ slug }: { slug: string }) {
                     }
                     rows={6}
                     placeholder="Write from the heart..."
-                    className={`w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400 ${
+                    className={`w-full min-h-[120px] rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400 ${
                       !isNoteValid && note.body.length === 0
                         ? "border-rose-300 bg-rose-50/50"
                         : "border-rose-100"
@@ -515,7 +515,7 @@ function CreateGiftInner({ slug }: { slug: string }) {
                       setNote((n) => ({ ...n, from: e.target.value }))
                     }
                     placeholder="Your name"
-                    className="w-full rounded-lg border border-rose-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400"
+                    className="w-full min-h-[44px] rounded-lg border border-rose-100 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-400"
                   />
                 </div>
               </div>
@@ -575,7 +575,7 @@ function CreateGiftInner({ slug }: { slug: string }) {
           )}
         </section>
 
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center justify-between gap-3 flex-wrap">
           <Button
             type="button"
             size="sm"
@@ -626,7 +626,7 @@ function CreateGiftInner({ slug }: { slug: string }) {
 
       {linkCopied && (
         <div
-          className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-full bg-rose-600 px-5 py-2.5 text-sm font-medium text-white shadow-lg"
+          className="fixed bottom-[max(1.5rem,calc(1rem+env(safe-area-inset-bottom)))] left-4 right-4 sm:left-1/2 sm:right-auto sm:w-auto sm:max-w-xs z-50 sm:-translate-x-1/2 rounded-full bg-rose-600 px-5 py-3 text-sm font-medium text-white shadow-lg text-center"
           role="status"
           aria-live="polite"
         >

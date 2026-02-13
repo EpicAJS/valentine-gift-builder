@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Heart, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -218,18 +218,62 @@ export function WordSearchScreenRender({
     setSelectedCells((prev) => new Set([...prev, key]));
   };
 
-  const handleMouseUp = () => {
-    if (isSelecting) {
-      checkWord(Array.from(selectedCells));
+  const handleCellTouchStart = useCallback(
+    (e: React.TouchEvent, row: number, col: number) => {
+      e.preventDefault();
+      const key = getCellKey(row, col);
+      const initial = new Set([key]);
+      selectedCellsRef.current = initial;
+      setIsSelecting(true);
+      setSelectedCells(initial);
+    },
+    []
+  );
+
+  const gridRef = useRef<HTMLDivElement>(null);
+  const isSelectingRef = useRef(false);
+  const selectedCellsRef = useRef<Set<string>>(new Set());
+  isSelectingRef.current = isSelecting;
+  selectedCellsRef.current = selectedCells;
+
+  const handleTouchMove = useCallback((e: TouchEvent) => {
+    if (!isSelectingRef.current || e.touches.length === 0) return;
+    e.preventDefault();
+    const touch = e.touches[0];
+    const el = document.elementFromPoint(touch.clientX, touch.clientY);
+    const cellEl = el?.closest("[data-cell-key]");
+    const key = cellEl?.getAttribute("data-cell-key");
+    if (key) {
+      const next = new Set([...selectedCellsRef.current, key]);
+      selectedCellsRef.current = next;
+      setSelectedCells(next);
+    }
+  }, []);
+
+  const handleEndSelection = useCallback(() => {
+    if (isSelectingRef.current) {
+      checkWord(Array.from(selectedCellsRef.current));
       setSelectedCells(new Set());
       setIsSelecting(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    window.addEventListener("mouseup", handleMouseUp);
-    return () => window.removeEventListener("mouseup", handleMouseUp);
-  }, [isSelecting, selectedCells]);
+    const onMouseUp = () => handleEndSelection();
+    window.addEventListener("mouseup", onMouseUp);
+    return () => window.removeEventListener("mouseup", onMouseUp);
+  }, [handleEndSelection]);
+
+  useEffect(() => {
+    window.addEventListener("touchend", handleEndSelection, { passive: true });
+    return () => window.removeEventListener("touchend", handleEndSelection);
+  }, [handleEndSelection]);
+
+  useEffect(() => {
+    if (!isSelecting) return;
+    document.addEventListener("touchmove", handleTouchMove, { passive: false });
+    return () => document.removeEventListener("touchmove", handleTouchMove);
+  }, [isSelecting, handleTouchMove]);
 
   if (!data.words.length) {
     return (
@@ -250,7 +294,7 @@ export function WordSearchScreenRender({
 
   return (
     <div
-      className="min-h-screen flex flex-col items-center p-4 py-8 pb-16"
+      className="min-h-screen flex flex-col items-center p-4 sm:p-6 py-6 sm:py-8 pb-[calc(4rem+env(safe-area-inset-bottom))]"
       style={{ background: background ?? "#fff1f2" }}
     >
       <div className="max-w-4xl w-full">
@@ -272,6 +316,9 @@ export function WordSearchScreenRender({
           <p className="text-rose-300 text-sm mt-2">
             {foundWords.size} of {data.words.length} found
           </p>
+          <p className="text-rose-300/80 text-xs mt-1 sm:mt-0" aria-hidden>
+            Tap a letter, then drag to select a word
+          </p>
         </motion.div>
 
         <div className="flex flex-col md:flex-row gap-6">
@@ -283,7 +330,11 @@ export function WordSearchScreenRender({
               className="rounded-3xl shadow-2xl p-6 md:p-8 relative overflow-hidden bg-white border border-rose-100"
               style={background ? { background } : undefined}
             >
-              <div className="grid gap-1 select-none" style={{ gridTemplateColumns: `repeat(15, minmax(0, 1fr))` }}>
+              <div
+                ref={gridRef}
+                className="grid gap-1 select-none touch-none"
+                style={{ gridTemplateColumns: `repeat(15, minmax(0, 1fr))`, touchAction: "none" }}
+              >
                 {grid.map((row, rowIdx) =>
                   row.map((cell, colIdx) => {
                     const key = getCellKey(rowIdx, colIdx);
@@ -298,9 +349,13 @@ export function WordSearchScreenRender({
                     return (
                       <div
                         key={key}
+                        data-cell-key={key}
+                        role="button"
+                        tabIndex={0}
                         onMouseDown={() => handleCellMouseDown(rowIdx, colIdx)}
                         onMouseEnter={() => handleCellMouseEnter(rowIdx, colIdx)}
-                        className={`aspect-square flex items-center justify-center text-sm md:text-base font-bold rounded transition-all cursor-pointer ${
+                        onTouchStart={(e) => handleCellTouchStart(e, rowIdx, colIdx)}
+                        className={`aspect-square flex items-center justify-center text-sm md:text-base font-bold rounded transition-all cursor-pointer select-none ${
                           isFound
                             ? "bg-green-200 text-green-800 border border-green-400"
                             : isSelected

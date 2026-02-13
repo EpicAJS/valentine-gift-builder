@@ -63,7 +63,7 @@ export function ChocolateScreenRender({
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center p-4 py-12"
+      className="min-h-screen flex items-center justify-center p-4 sm:p-6 py-8 sm:py-12 pb-[calc(2rem+env(safe-area-inset-bottom))]"
       style={{ background: background ?? "#fff1f2" }}
     >
       <div className="max-w-5xl w-full">
@@ -91,7 +91,7 @@ export function ChocolateScreenRender({
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ delay: 0.2 }}
-          className={`rounded-3xl shadow-2xl p-8 md:p-12 relative overflow-hidden ${
+          className={`rounded-3xl shadow-2xl p-4 sm:p-8 md:p-12 relative overflow-hidden ${
             background ? "" : "bg-gradient-to-br from-rose-800 to-pink-900"
           }`}
           style={background ? { background } : undefined}
@@ -101,7 +101,7 @@ export function ChocolateScreenRender({
             <div className="absolute bottom-4 right-4 text-6xl">♥</div>
           </div>
 
-          <div className="grid grid-cols-4 md:grid-cols-6 gap-3 md:gap-4 relative">
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2 sm:gap-3 md:gap-4 relative">
             {reasons.map((reason, index) => (
               <motion.button
                 key={index}
@@ -164,7 +164,7 @@ export function ChocolateScreenRender({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto"
               onClick={closeModal}
             >
               <motion.div
@@ -172,12 +172,12 @@ export function ChocolateScreenRender({
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.8, opacity: 0 }}
                 onClick={(e) => e.stopPropagation()}
-                className="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full relative"
+                className="bg-white rounded-3xl shadow-2xl p-5 sm:p-8 max-w-md w-full relative my-4"
               >
                 <button
                   type="button"
                   onClick={closeModal}
-                  className="absolute top-4 right-4 p-2 hover:bg-rose-100 rounded-full transition-colors"
+                  className="absolute top-4 right-4 p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center hover:bg-rose-100 rounded-full transition-colors"
                 >
                   <X className="w-5 h-5 text-rose-500" />
                 </button>

@@ -157,7 +157,7 @@ export function MatchingPairsScreenRender({
 
   return (
     <div
-      className="min-h-screen flex flex-col items-center p-4 py-8 pb-16"
+      className="min-h-screen flex flex-col items-center p-4 sm:p-6 py-6 sm:py-8 pb-[calc(4rem+env(safe-area-inset-bottom))]"
       style={{ background: theme?.background ?? "#fff1f2" }}
     >
       <div className="max-w-4xl w-full">
@@ -183,7 +183,7 @@ export function MatchingPairsScreenRender({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.1 }}
-          className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4"
+          className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4"
         >
           {cards.map((card, index) => (
             <motion.button
