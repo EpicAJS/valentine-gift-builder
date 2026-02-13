@@ -174,10 +174,52 @@ export function WordSearchScreenRender({
 
   const getCellKey = (row: number, col: number) => `${row}-${col}`;
 
-  const checkWord = (cellKeys: string[]) => {
-    if (cellKeys.length < 2) return;
+  /** Expand a selection to the full line (horizontal, vertical, or diagonal) so diagonal words are easier to get. */
+  const expandSelectionToLine = useCallback(
+    (cellKeys: string[], gridSize: number): string[] => {
+      if (cellKeys.length < 2) return cellKeys;
+      const points = cellKeys.map((key) => {
+        const [r, c] = key.split("-").map(Number);
+        return { r, c };
+      });
+      const minR = Math.min(...points.map((p) => p.r));
+      const maxR = Math.max(...points.map((p) => p.r));
+      const minC = Math.min(...points.map((p) => p.c));
+      const maxC = Math.max(...points.map((p) => p.c));
 
-    const cells = cellKeys.map((key) => {
+      let line: { r: number; c: number }[] = [];
+
+      if (minR === maxR) {
+        for (let c = minC; c <= maxC; c++) line.push({ r: minR, c });
+      } else if (minC === maxC) {
+        for (let r = minR; r <= maxR; r++) line.push({ r, c: minC });
+      } else if (Math.abs(maxR - minR) === Math.abs(maxC - minC)) {
+        // Diagonal: use first and last by row so we get the correct direction (down-right vs up-right etc.)
+        const sorted = [...points].sort((a, b) => a.r !== b.r ? a.r - b.r : a.c - b.c);
+        const r0 = sorted[0].r;
+        const c0 = sorted[0].c;
+        const r1 = sorted[sorted.length - 1].r;
+        const c1 = sorted[sorted.length - 1].c;
+        const stepR = r1 > r0 ? 1 : -1;
+        const stepC = c1 > c0 ? 1 : -1;
+        const len = Math.abs(r1 - r0) + 1;
+        for (let i = 0; i < len; i++) {
+          line.push({ r: r0 + i * stepR, c: c0 + i * stepC });
+        }
+      } else {
+        return cellKeys;
+      }
+
+      return line.map((p) => getCellKey(p.r, p.c));
+    },
+    []
+  );
+
+  const checkWord = (cellKeys: string[]) => {
+    const expanded = expandSelectionToLine(cellKeys, 15);
+    if (expanded.length < 2) return;
+
+    const cells = expanded.map((key) => {
       const [row, col] = key.split("-").map(Number);
       return { row, col, cell: grid[row][col] };
     });
@@ -332,7 +374,7 @@ export function WordSearchScreenRender({
             >
               <div
                 ref={gridRef}
-                className="grid gap-1 select-none touch-none"
+                className="grid gap-1.5 sm:gap-2 select-none touch-none"
                 style={{ gridTemplateColumns: `repeat(15, minmax(0, 1fr))`, touchAction: "none" }}
               >
                 {grid.map((row, rowIdx) =>
@@ -355,7 +397,7 @@ export function WordSearchScreenRender({
                         onMouseDown={() => handleCellMouseDown(rowIdx, colIdx)}
                         onMouseEnter={() => handleCellMouseEnter(rowIdx, colIdx)}
                         onTouchStart={(e) => handleCellTouchStart(e, rowIdx, colIdx)}
-                        className={`aspect-square flex items-center justify-center text-sm md:text-base font-bold rounded transition-all cursor-pointer select-none ${
+                        className={`aspect-square min-w-[18px] min-h-[18px] flex items-center justify-center text-sm md:text-base font-bold rounded transition-all cursor-pointer select-none ${
                           isFound
                             ? "bg-green-200 text-green-800 border border-green-400"
                             : isSelected
