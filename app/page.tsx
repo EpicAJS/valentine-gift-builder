@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { GiftsCount } from "@/components/GiftsCount";
 
 const features = [
   {
@@ -90,6 +91,11 @@ export default function HomePage() {
             >
               See how it works
             </a>
+          </div>
+          <div className="mt-6 sm:mt-8 flex justify-center">
+            <div className="rounded-full border border-rose-200 bg-white/90 px-4 py-2 shadow-sm">
+              <GiftsCount className="text-sm sm:text-base text-rose-600" />
+            </div>
           </div>
         </div>
       </section>

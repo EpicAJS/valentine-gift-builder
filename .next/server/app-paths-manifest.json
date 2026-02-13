@@ -1,7 +1,4 @@
 {
-  "/page": "app/page.js",
-  "/icon.png/route": "app/icon.png/route.js",
-  "/create/page": "app/create/page.js",
-  "/api/gifts/route": "app/api/gifts/route.js",
-  "/g/[slug]/page": "app/g/[slug]/page.js"
+  "/api/gifts/count/route": "app/api/gifts/count/route.js",
+  "/page": "app/page.js"
 }

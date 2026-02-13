@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { GiftsCount } from "@/components/GiftsCount";
 import { LayoutNav } from "@/components/LayoutNav";
 import { Playfair_Display, Poppins } from "next/font/google";
 
@@ -41,6 +42,7 @@ export default function RootLayout({
           <LayoutNav />
           <main className="flex-1">{children}</main>
           <footer className="py-4 pb-[calc(1rem+env(safe-area-inset-bottom))] text-center text-xs text-rose-400 border-t border-rose-100">
+            <GiftsCount variant="compact" className="block mb-1 text-rose-500" />
             FromMe — Made with love ❤️
           </footer>
         </div>
